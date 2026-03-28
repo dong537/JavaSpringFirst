@@ -1,3 +1,4 @@
+import OSLog
 import SwiftUI
 import UIKit
 
@@ -35,8 +36,23 @@ struct BadgeTokenView: View {
                     }
                 }
                 .frame(height: 90)
+                .onAppear {
+                    Self.logMissingAssetIfNeeded(named: badgeAssetName)
+                }
             }
         }
         .frame(height: 90)
+    }
+
+    private static let logger = Logger(subsystem: "TianlaiVotePad", category: "Assets")
+    private static var loggedMissingAssets = Set<String>()
+
+    private static func logMissingAssetIfNeeded(named assetName: String) {
+        guard loggedMissingAssets.contains(assetName) == false else {
+            return
+        }
+
+        loggedMissingAssets.insert(assetName)
+        logger.error("Missing badge asset: \(assetName, privacy: .public)")
     }
 }

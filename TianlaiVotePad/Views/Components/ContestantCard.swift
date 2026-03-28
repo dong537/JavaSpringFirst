@@ -4,6 +4,7 @@ struct ContestantCard: View {
     let contestant: Contestant
     let isEnabled: Bool
     let isLocked: Bool
+    let isConfigurationValid: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -37,7 +38,7 @@ struct ContestantCard: View {
 
             Text(statusDescription)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(.white.opacity(0.82))
                 .lineLimit(2)
         }
         .padding(20)
@@ -56,8 +57,12 @@ struct ContestantCard: View {
             return "已投"
         }
 
+        if !isConfigurationValid {
+            return "未就绪"
+        }
+
         if isLocked {
-            return "锁定"
+            return "已锁定"
         }
 
         return "待投"
@@ -68,8 +73,12 @@ struct ContestantCard: View {
             return "已投 \(votes) 票"
         }
 
+        if !isConfigurationValid {
+            return "名单未配置完成"
+        }
+
         if isLocked {
-            return "当前余额为 0，无法投票"
+            return "当前票数已用完"
         }
 
         return "点击进入投票"
@@ -80,7 +89,7 @@ struct ContestantCard: View {
     }
 
     private var statusForeground: Color {
-        contestant.voted ? .white : (isLocked ? .white : .black)
+        contestant.voted ? .white : (isLocked || !isConfigurationValid ? .white : .black)
     }
 
     private var statusBackground: Color {
@@ -88,7 +97,7 @@ struct ContestantCard: View {
             return Color(red: 0.16, green: 0.56, blue: 0.40)
         }
 
-        if isLocked {
+        if isLocked || !isConfigurationValid {
             return .white.opacity(0.14)
         }
 

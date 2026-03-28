@@ -6,8 +6,8 @@ struct ContestantVoteView: View {
     @EnvironmentObject private var session: VotingSessionViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedVoteCount = 0
-    @State private var isPreviewPresented = false
+    @State private var selectedVoteCount: Int?
+    @State private var isSubmitting = false
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 4)
 
@@ -23,68 +23,96 @@ struct ContestantVoteView: View {
     }
 
     private func content(for contestant: Contestant) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(contestant.name)
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(contestant.name)
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
 
-                    Text("当前可分配票数：0 - \(session.remainingVotes)")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(.secondary)
-
-                    if contestant.voted {
-                        Text("该选手已完成投票，本轮不可再次修改。")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.red)
-                    } else if session.isLocked {
-                        Text("当前余额为 0，投票功能已锁定。")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.red)
-                    } else {
-                        Text("点击任一数字后，会先展示对应数量的节目徽章，再进入确认步骤。")
-                            .font(.system(size: 16, weight: .regular))
+                        Text("当前可分配票数：0 - \(session.remainingVotes)")
+                            .font(.system(size: 18, weight: .medium))
                             .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(24)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(0...16, id: \.self) { vote in
-                        VoteButton(
-                            value: vote,
-                            isEnabled: session.isVoteEnabled(vote, for: contestant)
-                        ) {
-                            selectedVoteCount = vote
-                            isPreviewPresented = true
+                        if contestant.voted {
+                            Text("该选手已完成投票，本轮不可再次修改。")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.red)
+                        } else if !session.isConfigurationValid {
+                            Text(session.validationMessage ?? "名单未配置完成，请先补齐配置。")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.red)
+                        } else if session.isLocked {
+                            Text("当前余额为 0，投票功能已锁定。")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.red)
+                        } else {
+                            Text("点击任一数字后，会先展示对应数量的节目徽章，再进入确认步骤。")
+                                .font(.system(size: 16, weight: .regular))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(0...16, id: \.self) { vote in
+                            VoteButton(
+                                value: vote,
+                                isEnabled: session.isVoteEnabled(vote, for: contestant)
+                            ) {
+                                selectedVoteCount = vote
+                            }
                         }
                     }
                 }
+                .padding(24)
+                .padding(.bottom, 24)
             }
-            .padding(24)
+            .background(Color(.systemBackground))
+
+            if let selectedVoteCount {
+                Color.black.opacity(0.35)
+                    .ignoresSafeArea()
+
+                BadgePreviewSheet(
+                    voteCount: selectedVoteCount,
+                    confirmationText: session.confirmationMessage(for: contestant.name, voteCount: selectedVoteCount),
+                    badgeAssetName: session.badgeAssetName,
+                    onCancel: {
+                        self.selectedVoteCount = nil
+                        isSubmitting = false
+                    },
+                    onConfirm: {
+                        guard isSubmitting == false else {
+                            return
+                        }
+
+                        isSubmitting = true
+
+                        if session.confirmVotes(for: contestant.id, count: selectedVoteCount) {
+                            self.selectedVoteCount = nil
+                            dismiss()
+                        } else {
+                            isSubmitting = false
+                        }
+                    }
+                )
+                .frame(maxWidth: 720)
+                .padding(24)
+                .transition(.opacity.combined(with: .scale))
+            }
         }
-        .background(Color(.systemBackground))
-        .sheet(isPresented: $isPreviewPresented) {
-            BadgePreviewSheet(
-                contestantName: contestant.name,
-                voteCount: selectedVoteCount,
-                badgeAssetName: session.badgeAssetName,
-                onCancel: {
-                    isPreviewPresented = false
-                },
-                onConfirm: {
-                    session.confirmVotes(for: contestant.id, count: selectedVoteCount)
-                    isPreviewPresented = false
+        .animation(.easeInOut(duration: 0.2), value: selectedVoteCount != nil)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("返回") {
                     dismiss()
                 }
-            )
-            .presentationDetents([.fraction(0.62), .large])
-            .presentationDragIndicator(.visible)
-        }
-        .toolbar {
+            }
+
             ToolbarItem(placement: .topBarTrailing) {
                 Text("剩余 \(session.remainingVotes) 票")
                     .font(.system(size: 16, weight: .semibold))

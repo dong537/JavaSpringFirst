@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct BadgePreviewSheet: View {
-    let contestantName: String
     let voteCount: Int
+    let confirmationText: String
     let badgeAssetName: String
     let onCancel: () -> Void
     let onConfirm: () -> Void
@@ -14,7 +14,7 @@ struct BadgePreviewSheet: View {
             Text("投票确认")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
 
-            Text("是否确认为【\(contestantName)】投 \(voteCount) 票？")
+            Text(confirmationText)
                 .font(.system(size: 18, weight: .medium))
 
             if voteCount == 0 {
@@ -32,9 +32,15 @@ struct BadgePreviewSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             } else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 14) {
-                        ForEach(0..<voteCount, id: \.self) { _ in
-                            BadgeTokenView(badgeAssetName: badgeAssetName)
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("徽章预览")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.secondary)
+
+                        LazyVGrid(columns: columns, spacing: 14) {
+                            ForEach(0..<voteCount, id: \.self) { _ in
+                                BadgeTokenView(badgeAssetName: badgeAssetName)
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -63,13 +69,20 @@ struct BadgePreviewSheet: View {
             }
         }
         .padding(28)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .stroke(.white.opacity(0.22), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.18), radius: 28, y: 12)
     }
 }
 
 #Preview {
     BadgePreviewSheet(
-        contestantName: "少年01",
         voteCount: 5,
+        confirmationText: "是否确认为【少年01】投 5 票？",
         badgeAssetName: "BadgeLogo",
         onCancel: {},
         onConfirm: {}

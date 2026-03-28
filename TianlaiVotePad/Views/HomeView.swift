@@ -4,46 +4,51 @@ struct HomeView: View {
     @EnvironmentObject private var session: VotingSessionViewModel
     @State private var path: [String] = []
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
-
     var body: some View {
         NavigationStack(path: $path) {
-            ZStack {
-                LinearGradient(
-                    colors: [Color(red: 0.05, green: 0.13, blue: 0.25), Color(red: 0.11, green: 0.25, blue: 0.42)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+            GeometryReader { proxy in
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(red: 0.05, green: 0.13, blue: 0.25), Color(red: 0.11, green: 0.25, blue: 0.42)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 24) {
-                    header
+                    VStack(alignment: .leading, spacing: 24) {
+                        header
 
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 18) {
-                            ForEach(session.sortedContestants) { contestant in
-                                Button {
-                                    guard session.canOpenVoting(for: contestant) else {
-                                        return
-                                    }
-
-                                    path.append(contestant.id)
-                                } label: {
-                                    ContestantCard(
-                                        contestant: contestant,
-                                        isEnabled: session.canOpenVoting(for: contestant),
-                                        isLocked: session.isLocked
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(!session.canOpenVoting(for: contestant))
-                            }
+                        if let validationMessage = session.validationMessage {
+                            validationBanner(message: validationMessage)
                         }
-                        .padding(.bottom, 12)
+
+                        ScrollView {
+                            LazyVGrid(columns: gridColumns(for: proxy.size), spacing: 18) {
+                                ForEach(session.sortedContestants) { contestant in
+                                    Button {
+                                        guard session.canOpenVoting(for: contestant) else {
+                                            return
+                                        }
+
+                                        path.append(contestant.id)
+                                    } label: {
+                                        ContestantCard(
+                                            contestant: contestant,
+                                            isEnabled: session.canOpenVoting(for: contestant),
+                                            isLocked: session.isLocked,
+                                            isConfigurationValid: session.isConfigurationValid
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                    .disabled(!session.canOpenVoting(for: contestant))
+                                }
+                            }
+                            .padding(.bottom, 12)
+                        }
                     }
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 24)
                 }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 24)
             }
             .navigationBarHidden(true)
             .navigationDestination(for: String.self) { contestantID in
@@ -86,6 +91,27 @@ struct HomeView: View {
             .background(.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
+    }
+
+    private func validationBanner(message: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(Color(red: 1.0, green: 0.86, blue: 0.31))
+
+            Text(message)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(red: 0.48, green: 0.12, blue: 0.14).opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private func gridColumns(for size: CGSize) -> [GridItem] {
+        let minimumWidth = size.width > size.height ? 220.0 : 170.0
+        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 260), spacing: 18)]
     }
 }
 
