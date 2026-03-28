@@ -1,0 +1,345 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000001 /* TianlaiVotePadApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* TianlaiVotePadApp.swift */; };
+		A00000000000000000000002 /* Contestant.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000012 /* Contestant.swift */; };
+		A00000000000000000000003 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* AppConfig.swift */; };
+		A00000000000000000000004 /* VotingSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000014 /* VotingSessionViewModel.swift */; };
+		A00000000000000000000005 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000015 /* HomeView.swift */; };
+		A00000000000000000000006 /* ContestantVoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000016 /* ContestantVoteView.swift */; };
+		A00000000000000000000007 /* BadgePreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000017 /* BadgePreviewSheet.swift */; };
+		A00000000000000000000008 /* ContestantCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000018 /* ContestantCard.swift */; };
+		A00000000000000000000009 /* VoteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000019 /* VoteButton.swift */; };
+		A0000000000000000000000A /* BadgeTokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001A /* BadgeTokenView.swift */; };
+		A0000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001C /* Assets.xcassets */; };
+		A0000000000000000000000C /* contestants.json in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001D /* contestants.json */; };
+		A0000000000000000000000D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001E /* Preview Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000010 /* TianlaiVotePad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TianlaiVotePad.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000011 /* TianlaiVotePadApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TianlaiVotePadApp.swift; sourceTree = "<group>"; };
+		A00000000000000000000012 /* Contestant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contestant.swift; sourceTree = "<group>"; };
+		A00000000000000000000013 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		A00000000000000000000014 /* VotingSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VotingSessionViewModel.swift; sourceTree = "<group>"; };
+		A00000000000000000000015 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A00000000000000000000016 /* ContestantVoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContestantVoteView.swift; sourceTree = "<group>"; };
+		A00000000000000000000017 /* BadgePreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgePreviewSheet.swift; sourceTree = "<group>"; };
+		A00000000000000000000018 /* ContestantCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContestantCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000019 /* VoteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteButton.swift; sourceTree = "<group>"; };
+		A0000000000000000000001A /* BadgeTokenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeTokenView.swift; sourceTree = "<group>"; };
+		A0000000000000000000001B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A0000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A0000000000000000000001D /* contestants.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contestants.json; sourceTree = "<group>"; };
+		A0000000000000000000001E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A00000000000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000021 = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000022 /* TianlaiVotePad */,
+				A0000000000000000000002A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000022 /* TianlaiVotePad */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000011 /* TianlaiVotePadApp.swift */,
+				A00000000000000000000023 /* Models */,
+				A00000000000000000000024 /* ViewModels */,
+				A00000000000000000000025 /* Views */,
+				A00000000000000000000026 /* Resources */,
+				A0000000000000000000001C /* Assets.xcassets */,
+				A00000000000000000000028 /* Preview Content */,
+				A0000000000000000000001B /* Info.plist */,
+			);
+			path = TianlaiVotePad;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000023 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000012 /* Contestant.swift */,
+				A00000000000000000000013 /* AppConfig.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000024 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000014 /* VotingSessionViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000025 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000015 /* HomeView.swift */,
+				A00000000000000000000016 /* ContestantVoteView.swift */,
+				A00000000000000000000017 /* BadgePreviewSheet.swift */,
+				A00000000000000000000029 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000026 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A0000000000000000000001D /* contestants.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000028 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				A0000000000000000000001E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		A00000000000000000000029 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000018 /* ContestantCard.swift */,
+				A00000000000000000000019 /* VoteButton.swift */,
+				A0000000000000000000001A /* BadgeTokenView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A0000000000000000000002A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000010 /* TianlaiVotePad.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A0000000000000000000002B /* TianlaiVotePad */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000033 /* Build configuration list for PBXNativeTarget "TianlaiVotePad" */;
+			buildPhases = (
+				A0000000000000000000002C /* Sources */,
+				A00000000000000000000020 /* Frameworks */,
+				A0000000000000000000002D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TianlaiVotePad;
+			productName = TianlaiVotePad;
+			productReference = A00000000000000000000010 /* TianlaiVotePad.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A0000000000000000000002E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A0000000000000000000002B = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = A0000000000000000000002F /* Build configuration list for PBXProject "TianlaiVotePad" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A00000000000000000000021;
+			productRefGroup = A0000000000000000000002A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A0000000000000000000002B /* TianlaiVotePad */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A0000000000000000000002D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0000000000000000000000B /* Assets.xcassets in Resources */,
+				A0000000000000000000000C /* contestants.json in Resources */,
+				A0000000000000000000000D /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A0000000000000000000002C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000001 /* TianlaiVotePadApp.swift in Sources */,
+				A00000000000000000000002 /* Contestant.swift in Sources */,
+				A00000000000000000000003 /* AppConfig.swift in Sources */,
+				A00000000000000000000004 /* VotingSessionViewModel.swift in Sources */,
+				A00000000000000000000005 /* HomeView.swift in Sources */,
+				A00000000000000000000006 /* ContestantVoteView.swift in Sources */,
+				A00000000000000000000007 /* BadgePreviewSheet.swift in Sources */,
+				A00000000000000000000008 /* ContestantCard.swift in Sources */,
+				A00000000000000000000009 /* VoteButton.swift in Sources */,
+				A0000000000000000000000A /* BadgeTokenView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000030 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A00000000000000000000031 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A00000000000000000000032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TianlaiVotePad/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TianlaiVotePad/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TianlaiVotePad;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		A00000000000000000000034 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TianlaiVotePad/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TianlaiVotePad/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TianlaiVotePad;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A0000000000000000000002F /* Build configuration list for PBXProject "TianlaiVotePad" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000030 /* Debug */,
+				A00000000000000000000031 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000033 /* Build configuration list for PBXNativeTarget "TianlaiVotePad" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000032 /* Debug */,
+				A00000000000000000000034 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A0000000000000000000002E /* Project object */;
+}

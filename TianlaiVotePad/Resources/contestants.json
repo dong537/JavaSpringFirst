@@ -1,0 +1,18 @@
+[
+  { "id": "contestant-01", "name": "少年01", "order": 1 },
+  { "id": "contestant-02", "name": "少年02", "order": 2 },
+  { "id": "contestant-03", "name": "少年03", "order": 3 },
+  { "id": "contestant-04", "name": "少年04", "order": 4 },
+  { "id": "contestant-05", "name": "少年05", "order": 5 },
+  { "id": "contestant-06", "name": "少年06", "order": 6 },
+  { "id": "contestant-07", "name": "少年07", "order": 7 },
+  { "id": "contestant-08", "name": "少年08", "order": 8 },
+  { "id": "contestant-09", "name": "少年09", "order": 9 },
+  { "id": "contestant-10", "name": "少年10", "order": 10 },
+  { "id": "contestant-11", "name": "少年11", "order": 11 },
+  { "id": "contestant-12", "name": "少年12", "order": 12 },
+  { "id": "contestant-13", "name": "少年13", "order": 13 },
+  { "id": "contestant-14", "name": "少年14", "order": 14 },
+  { "id": "contestant-15", "name": "少年15", "order": 15 },
+  { "id": "contestant-16", "name": "少年16", "order": 16 }
+]

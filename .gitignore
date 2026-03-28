@@ -1,0 +1,14 @@
+.DS_Store
+build/
+DerivedData/
+*.ipa
+*.xcarchive
+*.xcresult
+*.mobileprovision
+*.p12
+*.cer
+
+TianlaiVotePad.xcodeproj/project.xcworkspace/xcuserdata/
+TianlaiVotePad.xcodeproj/xcuserdata/
+**/xcuserdata/
+*.xcuserstate
