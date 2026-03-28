@@ -25,8 +25,10 @@ struct HomeView: View {
                         ScrollView {
                             LazyVGrid(columns: gridColumns(for: proxy.size), spacing: 18) {
                                 ForEach(session.sortedContestants) { contestant in
+                                    let entryState = session.entryState(for: contestant)
+
                                     Button {
-                                        guard session.canOpenVoting(for: contestant) else {
+                                        guard entryState.isInteractive else {
                                             return
                                         }
 
@@ -34,17 +36,16 @@ struct HomeView: View {
                                     } label: {
                                         ContestantCard(
                                             contestant: contestant,
-                                            isEnabled: session.canOpenVoting(for: contestant),
-                                            isLocked: session.isLocked,
-                                            isConfigurationValid: session.isConfigurationValid
+                                            entryState: entryState
                                         )
                                     }
                                     .buttonStyle(.plain)
-                                    .disabled(!session.canOpenVoting(for: contestant))
+                                    .disabled(!entryState.isInteractive)
                                 }
                             }
                             .padding(.bottom, 12)
                         }
+                        .scrollIndicators(.hidden)
                     }
                     .padding(.horizontal, 28)
                     .padding(.vertical, 24)
@@ -64,33 +65,63 @@ struct HomeView: View {
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
 
-            HStack(alignment: .center, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("剩余投票余额")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.8))
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .center, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("剩余投票余额")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.8))
 
-                    Text("\(session.remainingVotes) 票")
-                        .font(.system(size: 40, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(red: 1.0, green: 0.86, blue: 0.31))
+                        Text("\(session.remainingVotes) 票")
+                            .font(.system(size: 40, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(red: 1.0, green: 0.86, blue: 0.31))
+                    }
+
+                    Spacer()
+
+                    if session.isLocked {
+                        Text("余额已归零，投票已锁定")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 12)
+                            .background(.white.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
                 }
 
-                Spacer()
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        summaryChip(title: "已完成", value: "\(session.completedContestantCount) / 16")
+                        summaryChip(title: "待投", value: "\(session.pendingContestantCount) 位")
+                    }
 
-                if session.isLocked {
-                    Text("余额已归零，投票已锁定")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 12)
-                        .background(.white.opacity(0.12))
-                        .clipShape(Capsule())
+                    VStack(spacing: 12) {
+                        summaryChip(title: "已完成", value: "\(session.completedContestantCount) / 16")
+                        summaryChip(title: "待投", value: "\(session.pendingContestantCount) 位")
+                    }
                 }
             }
             .padding(24)
             .background(.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
+    }
+
+    private func summaryChip(title: String, value: String) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.white.opacity(0.78))
+
+            Text(value)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(.white.opacity(0.08))
+        .clipShape(Capsule())
     }
 
     private func validationBanner(message: String) -> some View {

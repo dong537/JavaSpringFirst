@@ -2,9 +2,7 @@ import SwiftUI
 
 struct ContestantCard: View {
     let contestant: Contestant
-    let isEnabled: Bool
-    let isLocked: Bool
-    let isConfigurationValid: Bool
+    let entryState: ContestantEntryState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -49,82 +47,87 @@ struct ContestantCard: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 1)
         )
-        .opacity(isEnabled || contestant.voted ? 1 : 0.7)
+        .opacity(entryState.isInteractive || isCompleted ? 1 : 0.7)
+    }
+
+    private var isCompleted: Bool {
+        if case .voted = entryState {
+            return true
+        }
+
+        return false
     }
 
     private var statusTitle: String {
-        if contestant.voted {
+        switch entryState {
+        case .pending:
+            return "待投"
+        case .voted:
             return "已投"
-        }
-
-        if !isConfigurationValid {
+        case .locked:
+            return "已锁定"
+        case .invalidConfiguration:
             return "未就绪"
         }
-
-        if isLocked {
-            return "已锁定"
-        }
-
-        return "待投"
     }
 
     private var statusDescription: String {
-        if let votes = contestant.allocatedVotes, contestant.voted {
+        switch entryState {
+        case let .voted(votes):
             return "已投 \(votes) 票"
-        }
-
-        if !isConfigurationValid {
+        case .invalidConfiguration:
             return "名单未配置完成"
-        }
-
-        if isLocked {
+        case .locked:
             return "当前票数已用完"
+        case .pending:
+            return "点击进入投票"
         }
-
-        return "点击进入投票"
     }
 
     private var accentColor: Color {
-        contestant.voted ? Color(red: 0.28, green: 0.78, blue: 0.56) : Color(red: 1.0, green: 0.84, blue: 0.28)
+        isCompleted ? Color(red: 0.28, green: 0.78, blue: 0.56) : Color(red: 1.0, green: 0.84, blue: 0.28)
     }
 
     private var statusForeground: Color {
-        contestant.voted ? .white : (isLocked || !isConfigurationValid ? .white : .black)
+        switch entryState {
+        case .pending:
+            return .black
+        case .voted, .locked, .invalidConfiguration:
+            return .white
+        }
     }
 
     private var statusBackground: Color {
-        if contestant.voted {
+        switch entryState {
+        case .voted:
             return Color(red: 0.16, green: 0.56, blue: 0.40)
-        }
-
-        if isLocked || !isConfigurationValid {
+        case .pending:
+            return Color(red: 1.0, green: 0.84, blue: 0.28)
+        case .locked, .invalidConfiguration:
             return .white.opacity(0.14)
         }
-
-        return Color(red: 1.0, green: 0.84, blue: 0.28)
     }
 
     private var cardBackground: LinearGradient {
-        if contestant.voted {
+        switch entryState {
+        case .voted:
             return LinearGradient(
                 colors: [Color(red: 0.10, green: 0.44, blue: 0.30), Color(red: 0.18, green: 0.62, blue: 0.44)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        }
-
-        if isEnabled {
+        case .pending:
             return LinearGradient(
                 colors: [Color(red: 0.76, green: 0.13, blue: 0.23), Color(red: 0.96, green: 0.41, blue: 0.18)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+        case .locked, .invalidConfiguration:
+            return LinearGradient(
+                colors: [Color(red: 0.29, green: 0.34, blue: 0.41), Color(red: 0.19, green: 0.22, blue: 0.29)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         }
-
-        return LinearGradient(
-            colors: [Color(red: 0.29, green: 0.34, blue: 0.41), Color(red: 0.19, green: 0.22, blue: 0.29)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
 }

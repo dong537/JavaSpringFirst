@@ -1,6 +1,17 @@
 import Combine
 import Foundation
 
+enum ContestantEntryState: Equatable {
+    case pending
+    case voted(Int)
+    case locked
+    case invalidConfiguration
+
+    var isInteractive: Bool {
+        self == .pending
+    }
+}
+
 @MainActor
 final class VotingSessionViewModel: ObservableObject {
     @Published private(set) var contestants: [Contestant]
@@ -31,15 +42,39 @@ final class VotingSessionViewModel: ObservableObject {
     }
 
     var sortedContestants: [Contestant] {
-        contestants.sorted { $0.order < $1.order }
+        contestants
+    }
+
+    var completedContestantCount: Int {
+        contestants.filter(\.voted).count
+    }
+
+    var pendingContestantCount: Int {
+        contestants.count - completedContestantCount
     }
 
     func contestant(for id: String) -> Contestant? {
         contestants.first { $0.id == id }
     }
 
+    func entryState(for contestant: Contestant) -> ContestantEntryState {
+        if contestant.voted {
+            return .voted(contestant.allocatedVotes ?? 0)
+        }
+
+        if !isConfigurationValid {
+            return .invalidConfiguration
+        }
+
+        if isLocked {
+            return .locked
+        }
+
+        return .pending
+    }
+
     func canOpenVoting(for contestant: Contestant) -> Bool {
-        !contestant.voted && !isLocked && isConfigurationValid
+        entryState(for: contestant).isInteractive
     }
 
     func isVoteEnabled(_ count: Int, for contestant: Contestant) -> Bool {
@@ -56,7 +91,7 @@ final class VotingSessionViewModel: ObservableObject {
 
     @discardableResult
     func confirmVotes(for contestantID: String, count: Int) -> Bool {
-        guard count >= 0, count <= remainingVotes else {
+        guard isConfigurationValid, count >= 0, count <= remainingVotes else {
             return false
         }
 

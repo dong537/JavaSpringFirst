@@ -4,10 +4,11 @@ struct BadgePreviewSheet: View {
     let voteCount: Int
     let confirmationText: String
     let badgeAssetName: String
+    let isConfirming: Bool
     let onCancel: () -> Void
     let onConfirm: () -> Void
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 14), count: 4)
+    private let columns = [GridItem(.adaptive(minimum: 92, maximum: 120), spacing: 14)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
@@ -57,15 +58,26 @@ struct BadgePreviewSheet: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(.gray)
+                .disabled(isConfirming)
 
                 Button(action: onConfirm) {
-                    Text("确认投票")
-                        .font(.system(size: 18, weight: .bold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
+                    Group {
+                        if isConfirming {
+                            ProgressView()
+                                .tint(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        } else {
+                            Text("确认投票")
+                                .font(.system(size: 18, weight: .bold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        }
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 0.79, green: 0.15, blue: 0.18))
+                .disabled(isConfirming)
             }
         }
         .padding(28)
@@ -84,6 +96,7 @@ struct BadgePreviewSheet: View {
         voteCount: 5,
         confirmationText: "是否确认为【少年01】投 5 票？",
         badgeAssetName: "BadgeLogo",
+        isConfirming: false,
         onCancel: {},
         onConfirm: {}
     )

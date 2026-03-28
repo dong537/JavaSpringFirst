@@ -25,6 +25,18 @@ struct VoteButton: View {
                     .stroke(isEnabled ? Color(red: 0.85, green: 0.24, blue: 0.21) : Color.clear, lineWidth: 1.5)
             )
         }
+        .buttonStyle(VoteButtonPressStyle(isEnabled: isEnabled))
         .disabled(!isEnabled)
+    }
+}
+
+private struct VoteButtonPressStyle: ButtonStyle {
+    let isEnabled: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && isEnabled ? 0.97 : 1)
+            .opacity(configuration.isPressed && isEnabled ? 0.92 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
