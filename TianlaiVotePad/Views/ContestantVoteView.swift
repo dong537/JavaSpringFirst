@@ -10,6 +10,8 @@ struct ContestantVoteView: View {
     @State private var confirmedVoteCount: Int?
     @State private var isSubmitting = false
 
+    private let voteBadgeAspectRatio: CGFloat = 349.0 / 288.0
+
     var body: some View {
         Group {
             if let contestant = session.contestant(for: contestantID) {
@@ -26,14 +28,13 @@ struct ContestantVoteView: View {
     private func content(for contestant: Contestant) -> some View {
         GeometryReader { proxy in
             let hasOverlay = selectedVoteCount != nil || confirmedVoteCount != nil
-            let safeTop = proxy.safeAreaInsets.top
-            let layout = voteLayout(for: proxy.size)
+            let layout = voteLayout(for: proxy.size, safeTop: proxy.safeAreaInsets.top)
 
             ZStack(alignment: .top) {
                 voteBackground
 
                 VStack(spacing: 0) {
-                    topBar(topInset: safeTop, remainingVotes: session.remainingVotes)
+                    topBar(layout: layout, remainingVotes: session.remainingVotes)
 
                     Spacer(minLength: layout.topSpacing)
 
@@ -78,7 +79,7 @@ struct ContestantVoteView: View {
                             }
                         }
                     )
-                    .frame(maxWidth: 720)
+                    .frame(maxWidth: min(720, proxy.size.width - 32))
                     .padding(24)
                     .transition(.opacity.combined(with: .scale))
                 }
@@ -103,18 +104,18 @@ struct ContestantVoteView: View {
         AppPageBackground()
     }
 
-    private func topBar(topInset: CGFloat, remainingVotes: Int) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+    private func topBar(layout: VoteLayout, remainingVotes: Int) -> some View {
+        HStack(alignment: .top, spacing: layout.topBarSpacing) {
             Button {
                 dismiss()
             } label: {
                 ZStack {
                     Circle()
                         .fill(.black.opacity(0.28))
-                        .frame(width: 42, height: 42)
+                        .frame(width: layout.backButtonSize, height: layout.backButtonSize)
 
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: layout.backIconSize, weight: .bold))
                         .foregroundStyle(.white)
                 }
             }
@@ -122,14 +123,14 @@ struct ContestantVoteView: View {
 
             RemainingVotesBadge(
                 votes: remainingVotes,
-                width: 300,
-                numberFontSize: 46,
-                trailingPadding: 28
+                width: layout.remainingBadgeWidth,
+                numberFontSize: layout.remainingBadgeNumberFontSize,
+                trailingPadding: layout.remainingBadgeTrailingPadding
             )
 
             Spacer()
         }
-        .padding(.top, max(12, topInset + 6))
+        .padding(.top, layout.topPadding)
     }
 
     private func voteRows(layout: VoteLayout, contestant: Contestant) -> some View {
@@ -167,26 +168,60 @@ struct ContestantVoteView: View {
         .frame(width: itemWidth)
     }
 
-    private func voteLayout(for size: CGSize) -> VoteLayout {
+    private func voteLayout(for size: CGSize, safeTop: CGFloat) -> VoteLayout {
         let landscape = size.width > size.height
-        let horizontalPadding = landscape ? max(28, size.width * 0.045) : 20.0
+        let horizontalPadding = landscape ? max(26, size.width * 0.038) : max(18, size.width * 0.024)
         let availableWidth = size.width - horizontalPadding * 2
+        let backButtonSize = landscape ? 42.0 : 38.0
+        let topPadding = max(12, safeTop + 6)
+        let remainingBadgeWidth = min(340, max(216, availableWidth * (landscape ? 0.30 : 0.48)))
+        let remainingBadgeAspectRatio: CGFloat = 580.0 / 124.0
+        let topBarHeight = max(backButtonSize, remainingBadgeWidth / remainingBadgeAspectRatio)
+        let baseTopSpacing = landscape ? max(18, size.height * 0.03) : max(28, size.height * 0.05)
+        let baseBottomSpacing = landscape ? max(18, size.height * 0.03) : max(24, size.height * 0.04)
+        let baseRowSpacing = landscape ? max(12, size.height * 0.025) : max(18, size.height * 0.03)
+        let baseZeroTopPadding = landscape ? 8.0 : 6.0
         let preferredSpacing = landscape
-            ? min(26, max(12, availableWidth * 0.018))
-            : min(14, max(8, availableWidth * 0.016))
-        let itemWidth = min(132, max(82, (availableWidth - preferredSpacing * 7) / 8))
-        let itemSpacing = max(8, min(preferredSpacing, (availableWidth - itemWidth * 8) / 7))
-        let zeroItemWidth = min(140, itemWidth * (landscape ? 1.06 : 1.12))
+            ? min(22, max(10, availableWidth * 0.014))
+            : min(14, max(6, availableWidth * 0.01))
+        let widthLimitedItem = max(82, (availableWidth - preferredSpacing * 7) / 8)
+        let zeroScale = landscape ? 1.06 : 1.12
+        let usableHeight = max(
+            220,
+            size.height - topPadding - topBarHeight - baseTopSpacing - baseBottomSpacing
+        )
+        let heightLimitedItem = max(
+            82,
+            (usableHeight - baseRowSpacing * 2 - baseZeroTopPadding) * voteBadgeAspectRatio / (2 + zeroScale)
+        )
+        let itemWidth = min(widthLimitedItem, heightLimitedItem)
+        let itemSpacing = max(6, (availableWidth - itemWidth * 8) / 7)
+        let zeroItemWidth = itemWidth * zeroScale
+        let badgeHeight = itemWidth / voteBadgeAspectRatio
+        let zeroBadgeHeight = zeroItemWidth / voteBadgeAspectRatio
+        let occupiedHeight = badgeHeight * 2 + zeroBadgeHeight + baseRowSpacing * 2 + baseZeroTopPadding
+        let verticalSlack = max(0, usableHeight - occupiedHeight)
+        let topSpacing = baseTopSpacing + verticalSlack * (landscape ? 0.36 : 0.30)
+        let rowSpacing = baseRowSpacing + verticalSlack * (landscape ? 0.16 : 0.20)
+        let bottomSpacing = baseBottomSpacing + verticalSlack * (landscape ? 0.18 : 0.24)
+        let zeroTopPadding = baseZeroTopPadding + verticalSlack * 0.06
 
         return VoteLayout(
             horizontalPadding: horizontalPadding,
             itemWidth: itemWidth,
             itemSpacing: itemSpacing,
             zeroItemWidth: zeroItemWidth,
-            rowSpacing: landscape ? 18 : 22,
-            topSpacing: landscape ? 22 : 36,
-            bottomSpacing: landscape ? 28 : 34,
-            zeroTopPadding: landscape ? 8 : 4
+            rowSpacing: rowSpacing,
+            topSpacing: topSpacing,
+            bottomSpacing: bottomSpacing,
+            zeroTopPadding: zeroTopPadding,
+            topPadding: topPadding,
+            topBarSpacing: landscape ? 16 : 12,
+            backButtonSize: backButtonSize,
+            backIconSize: landscape ? 18 : 16,
+            remainingBadgeWidth: remainingBadgeWidth,
+            remainingBadgeNumberFontSize: landscape ? 46 : 40,
+            remainingBadgeTrailingPadding: landscape ? 28 : 24
         )
     }
 
@@ -199,7 +234,7 @@ struct ContestantVoteView: View {
                     .font(.title2.bold())
                     .foregroundStyle(.white)
 
-                Text("请检查 contestants.json 配置。")
+                Text("请检查 contestants.json 配置")
                     .foregroundStyle(.white.opacity(0.82))
             }
         }
@@ -215,6 +250,13 @@ private struct VoteLayout {
     let topSpacing: CGFloat
     let bottomSpacing: CGFloat
     let zeroTopPadding: CGFloat
+    let topPadding: CGFloat
+    let topBarSpacing: CGFloat
+    let backButtonSize: CGFloat
+    let backIconSize: CGFloat
+    let remainingBadgeWidth: CGFloat
+    let remainingBadgeNumberFontSize: CGFloat
+    let remainingBadgeTrailingPadding: CGFloat
 }
 
 private struct FinalVoteResultOverlay: View {
@@ -245,15 +287,30 @@ private struct FinalVoteResultOverlay: View {
 
                     Spacer()
 
-                    Text("点击任意位置返回首页")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.82))
-                        .padding(.bottom, max(32, proxy.safeAreaInsets.bottom + 12))
+                    Button(action: onContinue) {
+                        Text("退出返回首页")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: min(proxy.size.width * 0.42, 320))
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(red: 0.86, green: 0.21, blue: 0.13), Color(red: 0.59, green: 0.08, blue: 0.08)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.white.opacity(0.22), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.24), radius: 12, y: 6)
+                    }
+                    .padding(.bottom, max(32, proxy.safeAreaInsets.bottom + 12))
                 }
                 .padding(.horizontal, 48)
             }
-            .contentShape(Rectangle())
-            .onTapGesture(perform: onContinue)
         }
         .accessibilityElement(children: .contain)
     }

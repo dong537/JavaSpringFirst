@@ -4,6 +4,7 @@ struct Contestant: Identifiable, Codable, Hashable {
     let id: String
     let name: String
     let order: Int
+    let badgeOrder: Int?
     var voted: Bool
     var allocatedVotes: Int?
 
@@ -11,18 +12,20 @@ struct Contestant: Identifiable, Codable, Hashable {
         id: String,
         name: String,
         order: Int,
+        badgeOrder: Int? = nil,
         voted: Bool = false,
         allocatedVotes: Int? = nil
     ) {
         self.id = id
         self.name = name
         self.order = order
+        self.badgeOrder = badgeOrder
         self.voted = voted
         self.allocatedVotes = allocatedVotes
     }
 
     var badgeImageAssetName: String {
-        String(format: "ContestantBadge%02d", order)
+        String(format: "ContestantBadge%02d", badgeOrder ?? order)
     }
 
     var badgeAccessibilityLabel: String {

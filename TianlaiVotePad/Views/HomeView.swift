@@ -6,19 +6,21 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            GeometryReader { _ in
+            GeometryReader { proxy in
+                let layout = homeLayout(for: proxy.size)
+
                 ZStack {
                     AppPageBackground()
 
-                    VStack(alignment: .leading, spacing: 24) {
-                        header
+                    VStack(alignment: .leading, spacing: layout.sectionSpacing) {
+                        header(layout: layout)
 
                         if let validationMessage = session.validationMessage {
                             validationBanner(message: validationMessage)
                         }
 
                         ScrollView {
-                            LazyVGrid(columns: gridColumns, spacing: 18) {
+                            LazyVGrid(columns: gridColumns(for: layout), spacing: layout.gridSpacing) {
                                 ForEach(session.sortedContestants) { contestant in
                                     let entryState = session.entryState(for: contestant)
 
@@ -42,8 +44,9 @@ struct HomeView: View {
                         }
                         .scrollIndicators(.hidden)
                     }
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 24)
+                    .padding(.horizontal, layout.horizontalPadding)
+                    .padding(.top, layout.topPadding)
+                    .padding(.bottom, layout.bottomPadding)
                 }
             }
             .navigationBarHidden(true)
@@ -54,26 +57,28 @@ struct HomeView: View {
         }
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(session.title)
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+    private func header(layout: HomeLayout) -> some View {
+        VStack(alignment: .leading, spacing: layout.headerSpacing) {
+            VStack(alignment: .leading, spacing: layout.headerCardSpacing) {
+                HStack(alignment: .center, spacing: layout.headerRowSpacing) {
+                    Text(session.title)
+                        .font(.system(size: layout.titleFontSize, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .center, spacing: 16) {
+                    Spacer(minLength: layout.headerRowSpacing)
+
                     RemainingVotesBadge(
                         votes: session.remainingVotes,
-                        width: 360,
-                        numberFontSize: 54,
-                        trailingPadding: 26
+                        width: layout.badgeWidth,
+                        numberFontSize: layout.badgeNumberFontSize,
+                        trailingPadding: layout.badgeTrailingPadding
                     )
-
-                    Spacer()
 
                     if session.isLocked {
                         Text("余额已归零，投票已锁定")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: layout.lockChipFontSize, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 18)
                             .padding(.vertical, 12)
@@ -83,18 +88,18 @@ struct HomeView: View {
                 }
 
                 ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: layout.summarySpacing) {
                         summaryChip(title: "已完成", value: "\(session.completedContestantCount) / 16")
                         summaryChip(title: "待投", value: "\(session.pendingContestantCount) 位")
                     }
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: layout.summarySpacing) {
                         summaryChip(title: "已完成", value: "\(session.completedContestantCount) / 16")
                         summaryChip(title: "待投", value: "\(session.pendingContestantCount) 位")
                     }
                 }
             }
-            .padding(24)
+            .padding(layout.headerCardPadding)
             .background(.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
@@ -132,9 +137,60 @@ struct HomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
-    private var gridColumns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
+    private func gridColumns(for layout: HomeLayout) -> [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(), spacing: layout.gridSpacing, alignment: .top),
+            count: layout.columnCount
+        )
     }
+
+    private func homeLayout(for size: CGSize) -> HomeLayout {
+        let landscape = size.width > size.height
+        let horizontalPadding = landscape ? max(24, size.width * 0.03) : max(18, size.width * 0.024)
+        let gridSpacing = landscape ? 18.0 : 14.0
+        let minCardWidth = landscape ? 180.0 : 150.0
+        let availableWidth = size.width - horizontalPadding * 2
+        let rawColumnCount = Int((availableWidth + gridSpacing) / (minCardWidth + gridSpacing))
+        let columnCount = min(4, max(2, rawColumnCount))
+
+        return HomeLayout(
+            horizontalPadding: horizontalPadding,
+            topPadding: landscape ? 24 : 18,
+            bottomPadding: landscape ? 24 : 18,
+            sectionSpacing: landscape ? 22 : 18,
+            headerSpacing: landscape ? 14 : 10,
+            headerCardSpacing: landscape ? 16 : 14,
+            headerRowSpacing: landscape ? 16 : 12,
+            headerCardPadding: landscape ? 24 : 18,
+            gridSpacing: gridSpacing,
+            columnCount: columnCount,
+            titleFontSize: landscape ? 34 : 28,
+            badgeWidth: min(360, max(220, availableWidth * (landscape ? 0.33 : 0.52))),
+            badgeNumberFontSize: landscape ? 54 : 42,
+            badgeTrailingPadding: landscape ? 26 : 22,
+            lockChipFontSize: landscape ? 16 : 14,
+            summarySpacing: landscape ? 12 : 10
+        )
+    }
+}
+
+private struct HomeLayout {
+    let horizontalPadding: CGFloat
+    let topPadding: CGFloat
+    let bottomPadding: CGFloat
+    let sectionSpacing: CGFloat
+    let headerSpacing: CGFloat
+    let headerCardSpacing: CGFloat
+    let headerRowSpacing: CGFloat
+    let headerCardPadding: CGFloat
+    let gridSpacing: CGFloat
+    let columnCount: Int
+    let titleFontSize: CGFloat
+    let badgeWidth: CGFloat
+    let badgeNumberFontSize: CGFloat
+    let badgeTrailingPadding: CGFloat
+    let lockChipFontSize: CGFloat
+    let summarySpacing: CGFloat
 }
 
 private struct ContestantCardButtonStyle: ButtonStyle {

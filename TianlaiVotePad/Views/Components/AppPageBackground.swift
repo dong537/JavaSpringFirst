@@ -2,15 +2,21 @@ import SwiftUI
 
 struct AppPageBackground: View {
     var body: some View {
-        ZStack {
-            Color.black
-                .ignoresSafeArea()
+        GeometryReader { proxy in
+            let size = proxy.size
 
-            Image("VoteSelectionBackground")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+            ZStack {
+                Color.black
+
+                Image("VoteSelectionBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
+            }
+            .frame(width: size.width, height: size.height)
         }
+        .ignoresSafeArea()
     }
 }
 

@@ -43,7 +43,8 @@ struct AppConfig {
                 Contestant(
                     id: $0.id,
                     name: $0.name,
-                    order: $0.order
+                    order: $0.order,
+                    badgeOrder: $0.badgeOrder
                 )
             }
 
@@ -82,6 +83,7 @@ private struct ContestantSeed: Codable {
     let id: String
     let name: String
     let order: Int
+    let badgeOrder: Int?
 }
 
 private struct ContestantLoadResult {
