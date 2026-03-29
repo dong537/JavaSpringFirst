@@ -50,7 +50,8 @@ struct ContestantVoteView: View {
                             ForEach(0...session.initialVotes, id: \.self) { vote in
                                 VoteButton(
                                     value: vote,
-                                    isEnabled: session.isVoteEnabled(vote, for: contestant)
+                                    isEnabled: session.isVoteEnabled(vote, for: contestant),
+                                    isSelected: selectedVoteCount == vote
                                 ) {
                                     selectedVoteCount = vote
                                 }

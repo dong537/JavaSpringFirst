@@ -39,7 +39,7 @@ struct HomeView: View {
                                             entryState: entryState
                                         )
                                     }
-                                    .buttonStyle(.plain)
+                                    .buttonStyle(ContestantCardButtonStyle(isEnabled: entryState.isInteractive))
                                     .disabled(!entryState.isInteractive)
                                 }
                             }
@@ -143,6 +143,74 @@ struct HomeView: View {
     private func gridColumns(for size: CGSize) -> [GridItem] {
         let minimumWidth = size.width > size.height ? 220.0 : 170.0
         return [GridItem(.adaptive(minimum: minimumWidth, maximum: 260), spacing: 18)]
+    }
+}
+
+private struct ContestantCardButtonStyle: ButtonStyle {
+    let isEnabled: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .overlay {
+                if configuration.isPressed && isEnabled {
+                    ContestantCardHighlight()
+                        .transition(.opacity)
+                }
+            }
+            .scaleEffect(configuration.isPressed && isEnabled ? 0.985 : 1)
+            .brightness(configuration.isPressed && isEnabled ? 0.03 : 0)
+            .animation(.easeOut(duration: 0.14), value: configuration.isPressed)
+    }
+}
+
+private struct ContestantCardHighlight: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let circleSize = size.width * 0.73
+            let lineWidth = max(4, size.width * 0.014)
+
+            ZStack {
+                Circle()
+                    .trim(from: 0.03, to: 0.97)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.97, green: 0.84, blue: 0.44),
+                                Color(red: 0.82, green: 0.58, blue: 0.18),
+                                Color(red: 0.98, green: 0.9, blue: 0.6)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                    )
+                    .frame(width: circleSize, height: circleSize)
+                    .offset(y: -size.height * 0.015)
+                    .shadow(color: Color(red: 0.95, green: 0.77, blue: 0.28).opacity(0.45), radius: 12)
+
+                Circle()
+                    .trim(from: 0.14, to: 0.36)
+                    .stroke(
+                        Color(red: 0.99, green: 0.9, blue: 0.62).opacity(0.9),
+                        style: StrokeStyle(lineWidth: lineWidth * 0.55, lineCap: .round)
+                    )
+                    .frame(width: circleSize * 1.08, height: circleSize * 1.08)
+                    .offset(x: size.width * 0.02, y: -size.height * 0.015)
+
+                Circle()
+                    .fill(Color(red: 0.99, green: 0.9, blue: 0.62))
+                    .frame(width: lineWidth * 1.6, height: lineWidth * 1.6)
+                    .offset(x: -circleSize * 0.44, y: -circleSize * 0.37)
+
+                Circle()
+                    .fill(Color(red: 0.99, green: 0.9, blue: 0.62))
+                    .frame(width: lineWidth * 1.35, height: lineWidth * 1.35)
+                    .offset(x: circleSize * 0.38, y: circleSize * 0.34)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .allowsHitTesting(false)
     }
 }
 

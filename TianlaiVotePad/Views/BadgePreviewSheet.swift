@@ -8,46 +8,35 @@ struct BadgePreviewSheet: View {
     let onCancel: () -> Void
     let onConfirm: () -> Void
 
-    private let columns = [GridItem(.adaptive(minimum: 92, maximum: 120), spacing: 14)]
-
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             Text("投票确认")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
 
             Text(confirmationText)
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 36, weight: .bold, design: .rounded))
 
-            if voteCount == 0 {
-                VStack(spacing: 12) {
-                    Image(systemName: "minus.circle")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.orange)
+            VStack(spacing: 10) {
+                Text("\(voteCount)")
+                    .font(.system(size: 168, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color(red: 0.95, green: 0.71, blue: 0.18), Color(red: 0.84, green: 0.33, blue: 0.12)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
 
-                    Text("本次投票为 0 票")
-                        .font(.system(size: 20, weight: .semibold))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text("徽章预览")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.secondary)
-
-                        LazyVGrid(columns: columns, spacing: 14) {
-                            ForEach(0..<voteCount, id: \.self) { _ in
-                                BadgeTokenView(badgeAssetName: badgeAssetName)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                .frame(maxHeight: 280)
+                Text("本次投票 \(voteCount) 票")
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 28)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
 
             HStack(spacing: 14) {
                 Button(action: onCancel) {
