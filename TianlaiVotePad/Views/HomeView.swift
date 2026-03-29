@@ -8,12 +8,7 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             GeometryReader { _ in
                 ZStack {
-                    LinearGradient(
-                        colors: [Color(red: 0.05, green: 0.13, blue: 0.25), Color(red: 0.11, green: 0.25, blue: 0.42)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
+                    AppPageBackground()
 
                     VStack(alignment: .leading, spacing: 24) {
                         header

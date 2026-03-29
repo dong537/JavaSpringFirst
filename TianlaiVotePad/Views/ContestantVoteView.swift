@@ -100,15 +100,7 @@ struct ContestantVoteView: View {
     }
 
     private var voteBackground: some View {
-        ZStack {
-            Image("VoteSelectionBackground")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-
-            Color.black.opacity(0.14)
-                .ignoresSafeArea()
-        }
+        AppPageBackground()
     }
 
     private func topBar(topInset: CGFloat, remainingVotes: Int) -> some View {
@@ -142,23 +134,15 @@ struct ContestantVoteView: View {
 
     private func voteRows(layout: VoteLayout, contestant: Contestant) -> some View {
         VStack(spacing: layout.rowSpacing) {
-            voteRow(values: [1, 2, 3, 4], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
-            voteRow(values: [5, 6, 7, 8], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
+            voteRow(values: Array(1...8), itemWidth: layout.itemWidth, spacing: layout.itemSpacing, contestant: contestant)
+            voteRow(values: Array(9...16), itemWidth: layout.itemWidth, spacing: layout.itemSpacing, contestant: contestant)
 
-            HStack(alignment: .center, spacing: layout.compactSpacing) {
-                voteBadge(value: 0, itemWidth: layout.itemWidth, contestant: contestant)
-                    .offset(x: -layout.zeroXOffset, y: layout.zeroYOffset)
-
+            HStack {
                 Spacer(minLength: 0)
-
-                HStack(spacing: layout.compactSpacing) {
-                    ForEach([9, 10, 11, 12], id: \.self) { value in
-                        voteBadge(value: value, itemWidth: layout.itemWidth, contestant: contestant)
-                    }
-                }
+                voteBadge(value: 0, itemWidth: layout.zeroItemWidth, contestant: contestant)
+                Spacer(minLength: 0)
             }
-
-            voteRow(values: [13, 14, 15, 16], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
+            .padding(.top, layout.zeroTopPadding)
         }
         .frame(maxWidth: .infinity)
     }
@@ -185,22 +169,24 @@ struct ContestantVoteView: View {
 
     private func voteLayout(for size: CGSize) -> VoteLayout {
         let landscape = size.width > size.height
-        let horizontalPadding = landscape ? max(44, size.width * 0.07) : 24.0
+        let horizontalPadding = landscape ? max(28, size.width * 0.045) : 20.0
         let availableWidth = size.width - horizontalPadding * 2
-        let itemWidth = min(178, max(122, availableWidth / 5.3))
-        let standardSpacing = min(48, max(18, (availableWidth - itemWidth * 4) / 3.3))
-        let compactSpacing = min(28, max(10, (availableWidth - itemWidth * 5) / 4.3))
+        let preferredSpacing = landscape
+            ? min(26, max(12, availableWidth * 0.018))
+            : min(14, max(8, availableWidth * 0.016))
+        let itemWidth = min(132, max(82, (availableWidth - preferredSpacing * 7) / 8))
+        let itemSpacing = max(8, min(preferredSpacing, (availableWidth - itemWidth * 8) / 7))
+        let zeroItemWidth = min(140, itemWidth * (landscape ? 1.06 : 1.12))
 
         return VoteLayout(
             horizontalPadding: horizontalPadding,
             itemWidth: itemWidth,
-            standardSpacing: standardSpacing,
-            compactSpacing: compactSpacing,
-            rowSpacing: landscape ? 14 : 18,
+            itemSpacing: itemSpacing,
+            zeroItemWidth: zeroItemWidth,
+            rowSpacing: landscape ? 18 : 22,
             topSpacing: landscape ? 22 : 36,
-            bottomSpacing: 24,
-            zeroXOffset: landscape ? 12 : 0,
-            zeroYOffset: landscape ? 10 : 0
+            bottomSpacing: landscape ? 28 : 34,
+            zeroTopPadding: landscape ? 8 : 4
         )
     }
 
@@ -223,13 +209,12 @@ struct ContestantVoteView: View {
 private struct VoteLayout {
     let horizontalPadding: CGFloat
     let itemWidth: CGFloat
-    let standardSpacing: CGFloat
-    let compactSpacing: CGFloat
+    let itemSpacing: CGFloat
+    let zeroItemWidth: CGFloat
     let rowSpacing: CGFloat
     let topSpacing: CGFloat
     let bottomSpacing: CGFloat
-    let zeroXOffset: CGFloat
-    let zeroYOffset: CGFloat
+    let zeroTopPadding: CGFloat
 }
 
 private struct FinalVoteResultOverlay: View {
@@ -239,13 +224,7 @@ private struct FinalVoteResultOverlay: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Image("VoteSelectionBackground")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
+                AppPageBackground()
 
                 VStack(spacing: 0) {
                     Spacer(minLength: proxy.size.height * 0.12)
