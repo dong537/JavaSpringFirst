@@ -7,6 +7,7 @@ struct ContestantVoteView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedVoteCount: Int?
+    @State private var confirmedVoteCount: Int?
     @State private var isSubmitting = false
 
     var body: some View {
@@ -18,68 +19,31 @@ struct ContestantVoteView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(selectedVoteCount != nil)
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private func content(for contestant: Contestant) -> some View {
         GeometryReader { proxy in
-            let entryState = session.entryState(for: contestant)
-            let hasSelection = selectedVoteCount != nil
+            let hasOverlay = selectedVoteCount != nil || confirmedVoteCount != nil
+            let safeTop = proxy.safeAreaInsets.top
+            let layout = voteLayout(for: proxy.size)
 
-            ZStack {
-                Image("VoteSelectionBackground")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
+            ZStack(alignment: .top) {
+                voteBackground
 
-                Color.black.opacity(0.26)
-                    .ignoresSafeArea()
+                VStack(spacing: 0) {
+                    topBar(topInset: safeTop, remainingVotes: session.remainingVotes)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        VStack(spacing: 18) {
-                            Image(contestant.badgeImageAssetName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: min(proxy.size.width * 0.42, 360))
-                                .accessibilityLabel(contestant.badgeAccessibilityLabel)
+                    Spacer(minLength: layout.topSpacing)
 
-                            Text("当前可分配票数：0 - \(session.remainingVotes)")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.88))
+                    voteRows(layout: layout, contestant: contestant)
 
-                            Text(message(for: entryState))
-                                .font(.system(size: 16, weight: .regular))
-                                .foregroundStyle(messageColor(for: entryState))
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(24)
-                        .frame(maxWidth: .infinity)
-                        .background(.white.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                                .stroke(.white.opacity(0.16), lineWidth: 1)
-                        )
-
-                        LazyVGrid(columns: voteColumns(for: proxy.size), spacing: 18) {
-                            ForEach(0...session.initialVotes, id: \.self) { vote in
-                                VoteButton(
-                                    value: vote,
-                                    isEnabled: session.isVoteEnabled(vote, for: contestant),
-                                    isSelected: selectedVoteCount == vote
-                                ) {
-                                    selectedVoteCount = vote
-                                }
-                            }
-                        }
-                    }
-                    .padding(24)
-                    .padding(.bottom, 24)
+                    Spacer(minLength: layout.bottomSpacing)
                 }
-                .scrollIndicators(.hidden)
-                .blur(radius: hasSelection ? 1.5 : 0)
-                .allowsHitTesting(!hasSelection)
+                .padding(.horizontal, layout.horizontalPadding)
+                .blur(radius: hasOverlay ? 1.5 : 0)
+                .allowsHitTesting(!hasOverlay)
 
                 if let selectedVoteCount {
                     Color.black.opacity(0.35)
@@ -107,7 +71,8 @@ struct ContestantVoteView: View {
 
                             if session.confirmVotes(for: contestant.id, count: selectedVoteCount) {
                                 self.selectedVoteCount = nil
-                                dismiss()
+                                confirmedVoteCount = selectedVoteCount
+                                isSubmitting = false
                             } else {
                                 isSubmitting = false
                             }
@@ -117,68 +82,131 @@ struct ContestantVoteView: View {
                     .padding(24)
                     .transition(.opacity.combined(with: .scale))
                 }
+
+                if let confirmedVoteCount {
+                    FinalVoteResultOverlay(
+                        voteCount: confirmedVoteCount,
+                        onContinue: {
+                            self.confirmedVoteCount = nil
+                            dismiss()
+                        }
+                    )
+                    .transition(.opacity)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: selectedVoteCount != nil)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button("返回") {
-                    dismiss()
-                }
-                .disabled(selectedVoteCount != nil || isSubmitting)
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                RemainingVotesBadge(
-                    votes: session.remainingVotes,
-                    width: 220,
-                    numberFontSize: 30,
-                    trailingPadding: 18
-                )
-            }
-        }
-        .onDisappear {
-            selectedVoteCount = nil
-            isSubmitting = false
-        }
+        .animation(.easeInOut(duration: 0.25), value: confirmedVoteCount != nil)
     }
 
-    private func message(for entryState: ContestantEntryState) -> String {
-        switch entryState {
-        case let .voted(votes):
-            return "该选手已完成投票，本轮已投 \(votes) 票，不可再次修改。"
-        case .invalidConfiguration:
-            return session.validationMessage ?? "名单未配置完成，请先补齐配置。"
-        case .locked:
-            return "当前余额为 0，投票功能已锁定。"
-        case .pending:
-            return "请选择一个票数徽章，系统会先展示确认弹层，再进入最终确认。"
-        }
-    }
-
-    private func messageColor(for entryState: ContestantEntryState) -> Color {
-        switch entryState {
-        case .pending:
-            return .white.opacity(0.78)
-        case .voted, .locked, .invalidConfiguration:
-            return Color(red: 1.0, green: 0.82, blue: 0.82)
-        }
-    }
-
-    private func voteColumns(for size: CGSize) -> [GridItem] {
-        let minimumWidth = size.width > size.height ? 138.0 : 150.0
-        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 188), spacing: 18)]
-    }
-
-    private var missingContestantView: some View {
+    private var voteBackground: some View {
         ZStack {
             Image("VoteSelectionBackground")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            Color.black.opacity(0.28)
+            Color.black.opacity(0.14)
                 .ignoresSafeArea()
+        }
+    }
+
+    private func topBar(topInset: CGFloat, remainingVotes: Int) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Button {
+                dismiss()
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(.black.opacity(0.28))
+                        .frame(width: 42, height: 42)
+
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .disabled(selectedVoteCount != nil || confirmedVoteCount != nil || isSubmitting)
+
+            RemainingVotesBadge(
+                votes: remainingVotes,
+                width: 300,
+                numberFontSize: 46,
+                trailingPadding: 28
+            )
+
+            Spacer()
+        }
+        .padding(.top, max(12, topInset + 6))
+    }
+
+    private func voteRows(layout: VoteLayout, contestant: Contestant) -> some View {
+        VStack(spacing: layout.rowSpacing) {
+            voteRow(values: [1, 2, 3, 4], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
+            voteRow(values: [5, 6, 7, 8], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
+
+            HStack(alignment: .center, spacing: layout.compactSpacing) {
+                voteBadge(value: 0, itemWidth: layout.itemWidth, contestant: contestant)
+                    .offset(x: -layout.zeroXOffset, y: layout.zeroYOffset)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: layout.compactSpacing) {
+                    ForEach([9, 10, 11, 12], id: \.self) { value in
+                        voteBadge(value: value, itemWidth: layout.itemWidth, contestant: contestant)
+                    }
+                }
+            }
+
+            voteRow(values: [13, 14, 15, 16], itemWidth: layout.itemWidth, spacing: layout.standardSpacing, contestant: contestant)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func voteRow(values: [Int], itemWidth: CGFloat, spacing: CGFloat, contestant: Contestant) -> some View {
+        HStack(spacing: spacing) {
+            ForEach(values, id: \.self) { value in
+                voteBadge(value: value, itemWidth: itemWidth, contestant: contestant)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func voteBadge(value: Int, itemWidth: CGFloat, contestant: Contestant) -> some View {
+        VoteButton(
+            value: value,
+            isEnabled: session.isVoteEnabled(value, for: contestant),
+            isSelected: selectedVoteCount == value
+        ) {
+            selectedVoteCount = value
+        }
+        .frame(width: itemWidth)
+    }
+
+    private func voteLayout(for size: CGSize) -> VoteLayout {
+        let landscape = size.width > size.height
+        let horizontalPadding = landscape ? max(44, size.width * 0.07) : 24.0
+        let availableWidth = size.width - horizontalPadding * 2
+        let itemWidth = min(178, max(122, availableWidth / 5.3))
+        let standardSpacing = min(48, max(18, (availableWidth - itemWidth * 4) / 3.3))
+        let compactSpacing = min(28, max(10, (availableWidth - itemWidth * 5) / 4.3))
+
+        return VoteLayout(
+            horizontalPadding: horizontalPadding,
+            itemWidth: itemWidth,
+            standardSpacing: standardSpacing,
+            compactSpacing: compactSpacing,
+            rowSpacing: landscape ? 14 : 18,
+            topSpacing: landscape ? 22 : 36,
+            bottomSpacing: 24,
+            zeroXOffset: landscape ? 12 : 0,
+            zeroYOffset: landscape ? 10 : 0
+        )
+    }
+
+    private var missingContestantView: some View {
+        ZStack {
+            voteBackground
 
             VStack(spacing: 16) {
                 Text("选手数据不存在")
@@ -189,6 +217,146 @@ struct ContestantVoteView: View {
                     .foregroundStyle(.white.opacity(0.82))
             }
         }
+    }
+}
+
+private struct VoteLayout {
+    let horizontalPadding: CGFloat
+    let itemWidth: CGFloat
+    let standardSpacing: CGFloat
+    let compactSpacing: CGFloat
+    let rowSpacing: CGFloat
+    let topSpacing: CGFloat
+    let bottomSpacing: CGFloat
+    let zeroXOffset: CGFloat
+    let zeroYOffset: CGFloat
+}
+
+private struct FinalVoteResultOverlay: View {
+    let voteCount: Int
+    let onContinue: () -> Void
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                Image("VoteSelectionBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+
+                Color.black.opacity(0.18)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    Spacer(minLength: proxy.size.height * 0.12)
+
+                    Image(resultAssetName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: resultImageWidth(for: proxy.size))
+                        .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
+
+                    Spacer(minLength: proxy.size.height * 0.05)
+
+                    resultBanner
+
+                    Spacer(minLength: proxy.size.height * 0.02)
+
+                    resultCount
+
+                    Spacer()
+
+                    Text("点击任意位置返回首页")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.82))
+                        .padding(.bottom, max(32, proxy.safeAreaInsets.bottom + 12))
+                }
+                .padding(.horizontal, 48)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onContinue)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var resultAssetName: String {
+        voteCount == 0 ? "ContestantBadgeBase" : "FinalVoteRings\(voteCount)"
+    }
+
+    private func resultImageWidth(for size: CGSize) -> CGFloat {
+        switch voteCount {
+        case 0...2:
+            return min(size.width * 0.36, 360)
+        case 3...4:
+            return min(size.width * 0.5, 520)
+        case 5...8:
+            return min(size.width * 0.8, 980)
+        default:
+            return min(size.width * 0.86, 1140)
+        }
+    }
+
+    private var resultBanner: some View {
+        HStack(spacing: 0) {
+            ornamentCap
+
+            Text("获得融合舞台徽章数量")
+                .font(.system(size: 26, weight: .bold))
+                .foregroundStyle(Color(red: 0.22, green: 0.17, blue: 0.12))
+                .padding(.horizontal, 28)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.98, green: 0.93, blue: 0.8), Color(red: 0.95, green: 0.87, blue: 0.68)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            ornamentCap
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(red: 0.96, green: 0.9, blue: 0.78), Color(red: 0.93, green: 0.84, blue: 0.64)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color(red: 0.7, green: 0.29, blue: 0.16), lineWidth: 3)
+        )
+        .shadow(color: Color.black.opacity(0.18), radius: 10, y: 5)
+    }
+
+    private var ornamentCap: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(red: 0.86, green: 0.21, blue: 0.13), Color(red: 0.59, green: 0.08, blue: 0.08)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 44, height: 54)
+
+            Image(systemName: "flame.fill")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(Color(red: 1.0, green: 0.9, blue: 0.7))
+        }
+    }
+
+    private var resultCount: some View {
+        Text("\(voteCount)")
+            .font(.system(size: 220, weight: .black, design: .rounded))
+            .foregroundStyle(.white)
+            .shadow(color: Color(red: 0.72, green: 0.58, blue: 0.28).opacity(0.9), radius: 1, x: 2, y: 3)
+            .minimumScaleFactor(0.6)
+            .lineLimit(1)
     }
 }
 

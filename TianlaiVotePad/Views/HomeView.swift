@@ -232,6 +232,7 @@ struct RemainingVotesBadge: View {
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
+                    .offset(y: -1)
                     .padding(.trailing, trailingPadding)
             }
         }

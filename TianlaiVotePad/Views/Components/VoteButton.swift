@@ -10,45 +10,34 @@ struct VoteButton: View {
 
     var body: some View {
         Button(action: action) {
-            ZStack {
-                Image(voteAssetName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .saturation(isEnabled ? 1 : 0.08)
-                    .brightness(isEnabled ? 0 : -0.04)
-                    .opacity(isEnabled ? 1 : 0.55)
-
-                if !isEnabled {
-                    Circle()
-                        .fill(Color.black.opacity(0.22))
-                        .padding(14)
+            Image(voteAssetName)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .saturation(isEnabled ? 1 : 0.08)
+                .brightness(isEnabled ? 0 : -0.04)
+                .opacity(isEnabled ? 1 : 0.55)
+                .overlay {
+                    if !isEnabled {
+                        Circle()
+                            .fill(Color.black.opacity(0.22))
+                            .padding(14)
+                    }
                 }
-            }
-            .overlay {
-                if isEnabled && isSelected {
-                    VoteBadgeSelectionRing()
-                        .padding(10)
-                        .transition(.opacity)
+                .overlay {
+                    if isEnabled && isSelected {
+                        VoteBadgeSelectionRing()
+                            .padding(10)
+                            .transition(.opacity)
+                    }
                 }
-            }
-            .overlay(alignment: .bottom) {
-                Text(isEnabled ? "点击选择" : "不可投")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(isEnabled ? Color.white : Color.white.opacity(0.86))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.black.opacity(isEnabled ? 0.18 : 0.3))
-                    .clipShape(Capsule())
-                    .padding(.bottom, 6)
-            }
-            .shadow(
-                color: isEnabled
-                    ? (isSelected ? Color(red: 0.96, green: 0.83, blue: 0.45).opacity(0.42) : .black.opacity(0.16))
-                    : .clear,
-                radius: isSelected ? 16 : 10,
-                y: isSelected ? 8 : 5
-            )
+                .shadow(
+                    color: isEnabled
+                        ? (isSelected ? Color(red: 0.96, green: 0.83, blue: 0.45).opacity(0.42) : .black.opacity(0.16))
+                        : .clear,
+                    radius: isSelected ? 16 : 10,
+                    y: isSelected ? 8 : 5
+                )
         }
         .buttonStyle(VoteBadgeButtonStyle(isEnabled: isEnabled, isSelected: isSelected))
         .disabled(!isEnabled)
