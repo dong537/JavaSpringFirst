@@ -17,6 +17,7 @@
 		A00000000000000000000008 /* ContestantCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000018 /* ContestantCard.swift */; };
 		A00000000000000000000009 /* VoteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000019 /* VoteButton.swift */; };
 		A0000000000000000000000A /* BadgeTokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001A /* BadgeTokenView.swift */; };
+		A0000000000000000000000E /* AppPageBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001F /* AppPageBackground.swift */; };
 		A0000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001C /* Assets.xcassets */; };
 		A0000000000000000000000C /* contestants.json in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001D /* contestants.json */; };
 		A0000000000000000000000D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001E /* Preview Assets.xcassets */; };
@@ -38,6 +39,7 @@
 		A0000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A0000000000000000000001D /* contestants.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contestants.json; sourceTree = "<group>"; };
 		A0000000000000000000001E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		A0000000000000000000001F /* AppPageBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPageBackground.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 		A00000000000000000000029 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				A0000000000000000000001F /* AppPageBackground.swift */,
 				A00000000000000000000018 /* ContestantCard.swift */,
 				A00000000000000000000019 /* VoteButton.swift */,
 				A0000000000000000000001A /* BadgeTokenView.swift */,
@@ -217,6 +220,7 @@
 				A00000000000000000000008 /* ContestantCard.swift in Sources */,
 				A00000000000000000000009 /* VoteButton.swift in Sources */,
 				A0000000000000000000000A /* BadgeTokenView.swift in Sources */,
+				A0000000000000000000000E /* AppPageBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
