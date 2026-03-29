@@ -19,7 +19,7 @@ struct AppConfig {
             title: "《天籁与少年》投票器",
             initialVotes: 16,
             badgeAssetName: "BadgeLogo",
-            confirmationTemplate: "是否确认为【%@】投 %d 票？",
+            confirmationTemplate: "确认后将为该选手投 %d 票，结果不可修改。",
             contestants: contestantLoadResult.contestants,
             validationMessage: contestantLoadResult.validationMessage
         )

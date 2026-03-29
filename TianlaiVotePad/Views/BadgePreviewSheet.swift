@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BadgePreviewSheet: View {
+    let contestant: Contestant
     let voteCount: Int
     let confirmationText: String
     let badgeAssetName: String
@@ -14,7 +15,14 @@ struct BadgePreviewSheet: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
 
             Text(confirmationText)
-                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+
+            Image(contestant.badgeImageAssetName)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 280)
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel(contestant.badgeAccessibilityLabel)
 
             VStack(spacing: 10) {
                 Text("\(voteCount)")
@@ -82,8 +90,9 @@ struct BadgePreviewSheet: View {
 
 #Preview {
     BadgePreviewSheet(
+        contestant: Contestant(id: "contestant-01", name: "艾克里亚尔", order: 1),
         voteCount: 5,
-        confirmationText: "是否确认为【少年01】投 5 票？",
+        confirmationText: "确认后将为该选手投 5 票，结果不可修改。",
         badgeAssetName: "BadgeLogo",
         isConfirming: false,
         onCancel: {},

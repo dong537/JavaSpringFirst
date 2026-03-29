@@ -20,4 +20,12 @@ struct Contestant: Identifiable, Codable, Hashable {
         self.voted = voted
         self.allocatedVotes = allocatedVotes
     }
+
+    var badgeImageAssetName: String {
+        String(format: "ContestantBadge%02d", order)
+    }
+
+    var badgeAccessibilityLabel: String {
+        "\(name) 选手徽章"
+    }
 }

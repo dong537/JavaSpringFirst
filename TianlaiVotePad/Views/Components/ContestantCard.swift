@@ -4,7 +4,6 @@ struct ContestantCard: View {
     let contestant: Contestant
     let entryState: ContestantEntryState
 
-    private let badgeAssetName = "ContestantBadgeBase"
     private let badgeAspectRatio: CGFloat = 823.0 / 791.0
 
     var body: some View {
@@ -12,54 +11,16 @@ struct ContestantCard: View {
             let size = proxy.size
 
             ZStack {
-                badgeBackground
+                Image(contestant.badgeImageAssetName)
+                    .resizable()
+                    .scaledToFit()
+                    .saturation(isInactive ? 0.76 : 1)
+                    .brightness(isCompleted ? -0.03 : 0)
 
-                Circle()
-                    .fill(centerPlateGradient)
-                    .frame(width: size.width * 0.46, height: size.width * 0.46)
-                    .offset(y: -size.height * 0.02)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(0.42), lineWidth: max(2, size.width * 0.006))
-                    )
-
-                RoundedRectangle(cornerRadius: size.width * 0.07, style: .continuous)
-                    .fill(nameRibbonGradient)
-                    .frame(width: size.width * 0.82, height: size.height * 0.24)
-                    .offset(y: size.height * 0.22)
-                    .blur(radius: size.width * 0.012)
-
-                VStack(spacing: size.height * 0.03) {
-                    Spacer(minLength: size.height * 0.18)
-
-                    badgeTitle(
-                        String(format: "%02d", contestant.order),
-                        fontSize: size.width * 0.22,
-                        weight: .black
-                    )
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-
-                    Spacer(minLength: size.height * 0.14)
-
-                    VStack(spacing: size.height * 0.008) {
-                        badgeTitle(
-                            contestant.name,
-                            fontSize: contestant.name.count > 4 ? size.width * 0.105 : size.width * 0.13,
-                            weight: .heavy
-                        )
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.58)
-
-                        Text(statusDescription)
-                            .font(.system(size: size.width * 0.043, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color(red: 0.33, green: 0.41, blue: 0.52))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
+                if isInactive {
+                    RoundedRectangle(cornerRadius: size.width * 0.12, style: .continuous)
+                        .fill(colorOverlay)
                 }
-                .padding(.horizontal, size.width * 0.08)
-                .padding(.vertical, size.height * 0.08)
 
                 VStack {
                     HStack {
@@ -77,39 +38,41 @@ struct ContestantCard: View {
                     }
 
                     Spacer()
+
+                    Text(statusDescription)
+                        .font(.system(size: size.width * 0.044, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.white)
+                        .padding(.horizontal, size.width * 0.065)
+                        .padding(.vertical, size.height * 0.022)
+                        .background(.black.opacity(0.22))
+                        .clipShape(Capsule())
                 }
                 .padding(.top, size.height * 0.14)
                 .padding(.trailing, size.width * 0.1)
+                .padding(.bottom, size.height * 0.12)
             }
             .frame(width: size.width, height: size.height)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(contestant.badgeAccessibilityLabel)
+            .accessibilityValue(statusDescription)
         }
         .aspectRatio(badgeAspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
         .shadow(color: .black.opacity(isInactive ? 0.14 : 0.22), radius: 22, y: 12)
-        .opacity(isInactive ? 0.78 : 1)
+        .opacity(isInactive ? 0.82 : 1)
         .scaleEffect(isCompleted ? 0.985 : 1)
     }
 
-    private var badgeBackground: some View {
-        Image(badgeAssetName)
-            .resizable()
-            .scaledToFit()
-            .overlay(colorOverlay)
-            .saturation(isInactive ? 0.76 : 1)
-            .brightness(isCompleted ? -0.03 : 0)
-    }
-
-    @ViewBuilder
-    private var colorOverlay: some View {
+    private var colorOverlay: Color {
         switch entryState {
         case .pending:
-            Color.clear
+            return .clear
         case .voted:
-            Color(red: 0.07, green: 0.34, blue: 0.24).opacity(0.18)
+            return Color(red: 0.07, green: 0.34, blue: 0.24).opacity(0.18)
         case .locked:
-            Color.black.opacity(0.22)
+            return Color.black.opacity(0.22)
         case .invalidConfiguration:
-            Color(red: 0.25, green: 0.12, blue: 0.14).opacity(0.22)
+            return Color(red: 0.25, green: 0.12, blue: 0.14).opacity(0.22)
         }
     }
 
@@ -185,41 +148,6 @@ struct ContestantCard: View {
             )
         case .locked, .invalidConfiguration:
             return AnyShapeStyle(Color.black.opacity(0.26))
-        }
-    }
-
-    private var centerPlateGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color(red: 0.43, green: 0.76, blue: 0.86).opacity(0.97),
-                Color(red: 0.22, green: 0.59, blue: 0.74).opacity(0.95)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-    }
-
-    private var nameRibbonGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color(red: 0.95, green: 0.98, blue: 0.99).opacity(0.96),
-                Color(red: 0.83, green: 0.91, blue: 0.95).opacity(0.88)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-    }
-
-    private func badgeTitle(_ title: String, fontSize: CGFloat, weight: Font.Weight) -> some View {
-        ZStack {
-            Text(title)
-                .font(.system(size: fontSize, weight: weight, design: .rounded))
-                .foregroundStyle(Color(red: 0.73, green: 0.58, blue: 0.26))
-                .offset(x: 1, y: 2)
-
-            Text(title)
-                .font(.system(size: fontSize, weight: weight, design: .rounded))
-                .foregroundStyle(.white)
         }
     }
 }

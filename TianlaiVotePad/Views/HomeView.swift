@@ -6,7 +6,7 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            GeometryReader { proxy in
+            GeometryReader { _ in
                 ZStack {
                     LinearGradient(
                         colors: [Color(red: 0.05, green: 0.13, blue: 0.25), Color(red: 0.11, green: 0.25, blue: 0.42)],
@@ -23,7 +23,7 @@ struct HomeView: View {
                         }
 
                         ScrollView {
-                            LazyVGrid(columns: gridColumns(for: proxy.size), spacing: 18) {
+                            LazyVGrid(columns: gridColumns, spacing: 18) {
                                 ForEach(session.sortedContestants) { contestant in
                                     let entryState = session.entryState(for: contestant)
 
@@ -67,15 +67,12 @@ struct HomeView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .center, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("剩余投票余额")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.8))
-
-                        Text("\(session.remainingVotes) 票")
-                            .font(.system(size: 40, weight: .heavy, design: .rounded))
-                            .foregroundStyle(Color(red: 1.0, green: 0.86, blue: 0.31))
-                    }
+                    RemainingVotesBadge(
+                        votes: session.remainingVotes,
+                        width: 360,
+                        numberFontSize: 54,
+                        trailingPadding: 26
+                    )
 
                     Spacer()
 
@@ -140,9 +137,8 @@ struct HomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
-    private func gridColumns(for size: CGSize) -> [GridItem] {
-        let minimumWidth = size.width > size.height ? 220.0 : 170.0
-        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 260), spacing: 18)]
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
     }
 }
 
@@ -211,6 +207,39 @@ private struct ContestantCardHighlight: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .allowsHitTesting(false)
+    }
+}
+
+struct RemainingVotesBadge: View {
+    let votes: Int
+    let width: CGFloat
+    let numberFontSize: CGFloat
+    let trailingPadding: CGFloat
+
+    private let aspectRatio: CGFloat = 580.0 / 124.0
+
+    var body: some View {
+        ZStack {
+            Image("RemainingVotesLabel")
+                .resizable()
+                .scaledToFit()
+
+            HStack {
+                Spacer()
+
+                Text("\(votes)")
+                    .font(.system(size: numberFontSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .padding(.trailing, trailingPadding)
+            }
+        }
+        .frame(width: width)
+        .aspectRatio(aspectRatio, contentMode: .fit)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("剩余票数")
+        .accessibilityValue("\(votes) 票")
     }
 }
 

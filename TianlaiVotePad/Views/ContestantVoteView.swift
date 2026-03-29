@@ -27,26 +27,42 @@ struct ContestantVoteView: View {
             let hasSelection = selectedVoteCount != nil
 
             ZStack {
+                Image("VoteSelectionBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+
+                Color.black.opacity(0.26)
+                    .ignoresSafeArea()
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(contestant.name)
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                        VStack(spacing: 18) {
+                            Image(contestant.badgeImageAssetName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: min(proxy.size.width * 0.42, 360))
+                                .accessibilityLabel(contestant.badgeAccessibilityLabel)
 
                             Text("当前可分配票数：0 - \(session.remainingVotes)")
                                 .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.white.opacity(0.88))
 
                             Text(message(for: entryState))
                                 .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(messageColor(for: entryState))
+                                .multilineTextAlignment(.center)
                         }
                         .padding(24)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(.secondarySystemBackground))
+                        .frame(maxWidth: .infinity)
+                        .background(.white.opacity(0.1))
                         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                                .stroke(.white.opacity(0.16), lineWidth: 1)
+                        )
 
-                        LazyVGrid(columns: voteColumns(for: proxy.size), spacing: 16) {
+                        LazyVGrid(columns: voteColumns(for: proxy.size), spacing: 18) {
                             ForEach(0...session.initialVotes, id: \.self) { vote in
                                 VoteButton(
                                     value: vote,
@@ -61,7 +77,6 @@ struct ContestantVoteView: View {
                     .padding(24)
                     .padding(.bottom, 24)
                 }
-                .background(Color(.systemBackground))
                 .scrollIndicators(.hidden)
                 .blur(radius: hasSelection ? 1.5 : 0)
                 .allowsHitTesting(!hasSelection)
@@ -71,8 +86,9 @@ struct ContestantVoteView: View {
                         .ignoresSafeArea()
 
                     BadgePreviewSheet(
+                        contestant: contestant,
                         voteCount: selectedVoteCount,
-                        confirmationText: session.confirmationMessage(for: contestant.name, voteCount: selectedVoteCount),
+                        confirmationText: session.confirmationMessage(voteCount: selectedVoteCount),
                         badgeAssetName: session.badgeAssetName,
                         isConfirming: isSubmitting,
                         onCancel: {
@@ -113,8 +129,12 @@ struct ContestantVoteView: View {
             }
 
             ToolbarItem(placement: .topBarTrailing) {
-                Text("剩余 \(session.remainingVotes) 票")
-                    .font(.system(size: 16, weight: .semibold))
+                RemainingVotesBadge(
+                    votes: session.remainingVotes,
+                    width: 220,
+                    numberFontSize: 30,
+                    trailingPadding: 18
+                )
             }
         }
         .onDisappear {
@@ -132,34 +152,43 @@ struct ContestantVoteView: View {
         case .locked:
             return "当前余额为 0，投票功能已锁定。"
         case .pending:
-            return "点击任一数字后，会先展示对应数量的节目徽章，再进入确认步骤。"
+            return "请选择一个票数徽章，系统会先展示确认弹层，再进入最终确认。"
         }
     }
 
     private func messageColor(for entryState: ContestantEntryState) -> Color {
         switch entryState {
         case .pending:
-            return .secondary
+            return .white.opacity(0.78)
         case .voted, .locked, .invalidConfiguration:
-            return .red
+            return Color(red: 1.0, green: 0.82, blue: 0.82)
         }
     }
 
     private func voteColumns(for size: CGSize) -> [GridItem] {
-        let minimumWidth = size.width > size.height ? 120.0 : 145.0
-        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 180), spacing: 16)]
+        let minimumWidth = size.width > size.height ? 138.0 : 150.0
+        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 188), spacing: 18)]
     }
 
     private var missingContestantView: some View {
-        VStack(spacing: 16) {
-            Text("选手数据不存在")
-                .font(.title2.bold())
+        ZStack {
+            Image("VoteSelectionBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
 
-            Text("请检查 contestants.json 配置。")
-                .foregroundStyle(.secondary)
+            Color.black.opacity(0.28)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text("选手数据不存在")
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+
+                Text("请检查 contestants.json 配置。")
+                    .foregroundStyle(.white.opacity(0.82))
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
     }
 }
 

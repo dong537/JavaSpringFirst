@@ -85,8 +85,8 @@ final class VotingSessionViewModel: ObservableObject {
         return count >= 0 && count <= remainingVotes
     }
 
-    func confirmationMessage(for contestantName: String, voteCount: Int) -> String {
-        String(format: confirmationTemplate, contestantName, voteCount)
+    func confirmationMessage(voteCount: Int) -> String {
+        String(format: confirmationTemplate, voteCount)
     }
 
     @discardableResult
