@@ -279,11 +279,13 @@ private struct FinalVoteResultOverlay: View {
                 VStack(spacing: 0) {
                     Spacer(minLength: proxy.size.height * 0.12)
 
-                    Image(resultAssetName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: resultImageWidth(for: proxy.size))
-                        .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
+                    if let resultAssetName {
+                        Image(resultAssetName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: resultImageWidth(for: proxy.size))
+                            .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
+                    }
 
                     Spacer(minLength: proxy.size.height * 0.05)
 
@@ -323,8 +325,8 @@ private struct FinalVoteResultOverlay: View {
         .accessibilityElement(children: .contain)
     }
 
-    private var resultAssetName: String {
-        voteCount == 0 ? "ContestantBadgeBase" : "FinalVoteRings\(voteCount)"
+    private var resultAssetName: String? {
+        voteCount == 0 ? nil : "FinalVoteRings\(voteCount)"
     }
 
     private func resultImageWidth(for size: CGSize) -> CGFloat {
