@@ -252,6 +252,7 @@ private struct FinalResultsView: View {
     var body: some View {
         GeometryReader { proxy in
             let landscape = proxy.size.width > proxy.size.height
+            let results = session.finalResults
 
             ZStack {
                 AppPageBackground()
@@ -263,8 +264,8 @@ private struct FinalResultsView: View {
 
                     ScrollView {
                         LazyVStack(spacing: 14) {
-                            ForEach(Array(session.finalResults.enumerated()), id: \.element.id) { index, contestant in
-                                resultRow(rank: index + 1, contestant: contestant)
+                            ForEach(results.indices, id: \.self) { index in
+                                resultRow(rank: index + 1, contestant: results[index])
                             }
                         }
                         .padding(.horizontal, landscape ? 28 : 18)
@@ -278,7 +279,6 @@ private struct FinalResultsView: View {
                 .padding(.bottom, max(24, proxy.safeAreaInsets.bottom + 12))
             }
         }
-        .presentationBackground(.clear)
     }
 
     private var header: some View {
