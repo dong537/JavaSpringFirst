@@ -87,9 +87,16 @@ struct ContestantVoteView: View {
                 if let confirmedVoteCount {
                     FinalVoteResultOverlay(
                         voteCount: confirmedVoteCount,
+                        buttonTitle: session.allVotingCompleted ? "查看最终票数" : "退出返回首页",
                         onContinue: {
                             self.confirmedVoteCount = nil
                             dismiss()
+
+                            if session.allVotingCompleted {
+                                DispatchQueue.main.async {
+                                    session.requestFinalResultsPresentation()
+                                }
+                            }
                         }
                     )
                     .transition(.opacity)
@@ -261,6 +268,7 @@ private struct VoteLayout {
 
 private struct FinalVoteResultOverlay: View {
     let voteCount: Int
+    let buttonTitle: String
     let onContinue: () -> Void
 
     var body: some View {
@@ -288,7 +296,7 @@ private struct FinalVoteResultOverlay: View {
                     Spacer()
 
                     Button(action: onContinue) {
-                        Text("退出返回首页")
+                        Text(buttonTitle)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: min(proxy.size.width * 0.42, 320))

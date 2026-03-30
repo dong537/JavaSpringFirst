@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var session: VotingSessionViewModel
     @State private var path: [String] = []
+    @State private var isShowingFinalResults = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -14,6 +15,10 @@ struct HomeView: View {
 
                     VStack(alignment: .leading, spacing: layout.sectionSpacing) {
                         header(layout: layout)
+
+                        if session.allVotingCompleted {
+                            finalResultsButton
+                        }
 
                         if let validationMessage = session.validationMessage {
                             validationBanner(message: validationMessage)
@@ -55,6 +60,17 @@ struct HomeView: View {
                     .environmentObject(session)
             }
         }
+        .sheet(isPresented: $isShowingFinalResults, onDismiss: {
+            session.consumeFinalResultsPresentation()
+        }) {
+            FinalResultsView()
+                .environmentObject(session)
+        }
+        .onChange(of: session.shouldPresentFinalResults) { shouldPresent in
+            if shouldPresent {
+                isShowingFinalResults = true
+            }
+        }
     }
 
     private func header(layout: HomeLayout) -> some View {
@@ -77,7 +93,7 @@ struct HomeView: View {
                     )
 
                     if session.isLocked {
-                        Text("余额已归零，投票已锁定")
+                        Text("票数已分配完毕")
                             .font(.system(size: layout.lockChipFontSize, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 18)
@@ -103,6 +119,42 @@ struct HomeView: View {
             .background(.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
+    }
+
+    private var finalResultsButton: some View {
+        Button {
+            isShowingFinalResults = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "list.bullet.rectangle.portrait.fill")
+                    .font(.system(size: 18, weight: .bold))
+
+                Text("查看最终票数")
+                    .font(.system(size: 18, weight: .bold))
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 16, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 16)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 0.86, green: 0.21, blue: 0.13), Color(red: 0.59, green: 0.08, blue: 0.08)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.22), radius: 12, y: 6)
+        }
+        .buttonStyle(.plain)
     }
 
     private func summaryChip(title: String, value: String) -> some View {
@@ -191,6 +243,160 @@ private struct HomeLayout {
     let badgeTrailingPadding: CGFloat
     let lockChipFontSize: CGFloat
     let summarySpacing: CGFloat
+}
+
+private struct FinalResultsView: View {
+    @EnvironmentObject private var session: VotingSessionViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        GeometryReader { proxy in
+            let landscape = proxy.size.width > proxy.size.height
+
+            ZStack {
+                AppPageBackground()
+
+                VStack(spacing: landscape ? 20 : 16) {
+                    header
+
+                    summaryBar
+
+                    ScrollView {
+                        LazyVStack(spacing: 14) {
+                            ForEach(Array(session.finalResults.enumerated()), id: \.element.id) { index, contestant in
+                                resultRow(rank: index + 1, contestant: contestant)
+                            }
+                        }
+                        .padding(.horizontal, landscape ? 28 : 18)
+                        .padding(.bottom, 12)
+                    }
+
+                    closeButton
+                }
+                .padding(.horizontal, landscape ? 34 : 20)
+                .padding(.top, max(20, proxy.safeAreaInsets.top + 12))
+                .padding(.bottom, max(24, proxy.safeAreaInsets.bottom + 12))
+            }
+        }
+        .presentationBackground(.clear)
+    }
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("最终票数")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+
+                Text("全部投票完成后，可在这里查看每位选手得票")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.78))
+            }
+
+            Spacer()
+
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 42, height: 42)
+                    .background(.black.opacity(0.26))
+                    .clipShape(Circle())
+            }
+        }
+    }
+
+    private var summaryBar: some View {
+        HStack(spacing: 12) {
+            finalSummaryChip(title: "已完成", value: "\(session.completedContestantCount) / 16")
+            finalSummaryChip(title: "剩余票数", value: "\(session.remainingVotes)")
+            finalSummaryChip(title: "已分配", value: "\(session.initialVotes - session.remainingVotes)")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func finalSummaryChip(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.white.opacity(0.72))
+
+            Text(value)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(.white.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private func resultRow(rank: Int, contestant: Contestant) -> some View {
+        HStack(spacing: 16) {
+            Text("\(rank)")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(width: 34)
+
+            Image(contestant.badgeImageAssetName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 68, height: 68)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(contestant.name)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("第 \(contestant.order) 位投票对象")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.72))
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("\(contestant.allocatedVotes ?? 0)")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+
+                Text("票")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.78))
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(.black.opacity(0.2))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var closeButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            Text("关闭")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: 260)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.86, green: 0.21, blue: 0.13), Color(red: 0.59, green: 0.08, blue: 0.08)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 private struct ContestantCardButtonStyle: ButtonStyle {

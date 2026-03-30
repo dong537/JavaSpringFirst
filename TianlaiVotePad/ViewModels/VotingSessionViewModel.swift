@@ -16,6 +16,7 @@ enum ContestantEntryState: Equatable {
 final class VotingSessionViewModel: ObservableObject {
     @Published private(set) var contestants: [Contestant]
     @Published private(set) var remainingVotes: Int
+    @Published private(set) var shouldPresentFinalResults = false
 
     let title: String
     let badgeAssetName: String
@@ -51,6 +52,23 @@ final class VotingSessionViewModel: ObservableObject {
 
     var pendingContestantCount: Int {
         contestants.count - completedContestantCount
+    }
+
+    var allVotingCompleted: Bool {
+        !contestants.isEmpty && contestants.allSatisfy(\.voted)
+    }
+
+    var finalResults: [Contestant] {
+        contestants.sorted {
+            let lhsVotes = $0.allocatedVotes ?? 0
+            let rhsVotes = $1.allocatedVotes ?? 0
+
+            if lhsVotes == rhsVotes {
+                return $0.order < $1.order
+            }
+
+            return lhsVotes > rhsVotes
+        }
     }
 
     func contestant(for id: String) -> Contestant? {
@@ -107,5 +125,17 @@ final class VotingSessionViewModel: ObservableObject {
         contestants[index].allocatedVotes = count
         remainingVotes -= count
         return true
+    }
+
+    func requestFinalResultsPresentation() {
+        guard allVotingCompleted else {
+            return
+        }
+
+        shouldPresentFinalResults = true
+    }
+
+    func consumeFinalResultsPresentation() {
+        shouldPresentFinalResults = false
     }
 }
