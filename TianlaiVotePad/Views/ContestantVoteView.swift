@@ -344,7 +344,7 @@ private struct FinalVoteResultOverlay: View {
         HStack(spacing: 0) {
             ornamentCap
 
-            Text("获得融合舞台徽章数量")
+            Text("获得个人火种数量")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundStyle(Color(red: 0.22, green: 0.17, blue: 0.12))
                 .padding(.horizontal, 28)
